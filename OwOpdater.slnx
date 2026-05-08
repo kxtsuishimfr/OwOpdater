@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="OwOpdater.vcxproj" />
+  <Project Path="OwOpdater.vcxproj" Id="c8a5d895-6c75-4671-b5b8-6f7bf1c1ebce" />
 </Solution>

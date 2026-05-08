@@ -1,17 +1,51 @@
 #include "owopdater/core/updater/swapper.h"
 #include <filesystem>
 #include <system_error>
+#include <string>
+#include <algorithm>
 #include <Windows.h>
 
 namespace owopdater { namespace core { namespace updater {
 
 static bool clear_dir(const std::filesystem::path& dir, std::string& error) noexcept {
     std::error_code ec;
+
+    std::filesystem::path currentExe;
+    wchar_t modbuf[MAX_PATH] = {0};
+    if (GetModuleFileNameW(NULL, modbuf, MAX_PATH) != 0) {
+        currentExe = std::filesystem::path(modbuf);
+    }
+
+    auto lower = [](std::string s) {
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+        return s;
+    };
+
     for (auto& entry : std::filesystem::directory_iterator(dir, ec)) {
         if (ec) {
             error = "dir iter error";
             return false;
         }
+
+        if (!currentExe.empty()) {
+            std::error_code eqec;
+            if (std::filesystem::exists(entry.path(), eqec) && std::filesystem::exists(currentExe, eqec)) {
+                std::error_code eqec2;
+                bool same = std::filesystem::equivalent(entry.path(), currentExe, eqec2);
+                if (!eqec2 && same) continue;
+            }
+        }
+
+        std::string stem = entry.path().stem().string();
+        std::string ext = entry.path().extension().string();
+        if (!stem.empty()) {
+            std::string sstem = lower(stem);
+            std::string sext = lower(ext);
+            if (sstem == "owopdater" && sext == ".exe") {
+                continue;
+            }
+        }
+
         for (int attempt = 0; attempt < 10; ++attempt) {
             std::filesystem::remove_all(entry.path(), ec);
             if (!ec) break;
