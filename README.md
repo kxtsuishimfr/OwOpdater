@@ -14,4 +14,9 @@ It's simple, it just has a few args that you need to pass which are:
 Which lines up to this:
 * C:\OwOpdater\OwOpdater.exe -link https://yourlinkhere -absolute-dir C:\\Users\\Femboys\\tests -sha-256 sha256assdfasd -pid 1234
 
+And with launch arg
+* C:\OwOpdater\OwOpdater.exe -link https://yourlinkhere -absolute-dir C:\\Users\\Femboys\\tests -sha-256 sha256assdfasd -pid 1234 -launch Lunox.exe
+
+* This is CLI only
+
 Bye bye!!
