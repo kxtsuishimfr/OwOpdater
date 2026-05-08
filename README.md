@@ -33,7 +33,7 @@ And with launch arg
 
 5. Swaps the old files with the new ones in -absolute-dir (clears target folder first)
 
-6. Launches the executable specified in -launch (if u passed that arg)
+6. Launches the executable specified in -launch (if u passed that arg, relative to the dir u passed earlier)
 
 -----------------------------------------
 
