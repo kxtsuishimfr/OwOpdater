@@ -8,7 +8,7 @@ It's simple, it just has a few args that you need to pass which are:
 -link
 -pid
 -absolute dir
--sha256 (no other sha type)
+-sha-256 (no other sha type)
 -launch (optional)
 
 Which lines up to this:
