@@ -5,6 +5,9 @@
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <filesystem>
+#include "owopdater/utils/generic.h"
+#include <algorithm>
+#include <vector>
 
 namespace owopdater { namespace core { namespace updater {
 
@@ -96,6 +99,33 @@ bool install(const std::string& sourceFile, const std::string& filename, const s
             return false;
         }
         if (!unzip(sourceFile, tempExtract.string(), error)) return false;
+
+        {
+            std::vector<std::filesystem::path> toRemove;
+            std::error_code ec2;
+            for (auto& e : std::filesystem::recursive_directory_iterator(tempExtract, ec2)) {
+                if (ec2) break;
+                if (!e.is_regular_file(ec2)) continue;
+                std::string stem = e.path().stem().string();
+                std::string ext = e.path().extension().string();
+                std::transform(stem.begin(), stem.end(), stem.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+                std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+                if (stem == "owopdater" && ext == ".exe") {
+                    toRemove.push_back(e.path());
+                }
+            }
+            for (auto& p : toRemove) {
+                std::error_code remec;
+                for (int attempt = 0; attempt < 5; ++attempt) {
+                    std::filesystem::remove(p, remec);
+                    if (!remec) break;
+                    Sleep(200);
+                }
+                if (remec) DebugLog("failed removing extracted owopdater: " + p.string());
+                else DebugLog("removed extracted owopdater: " + p.string());
+            }
+        }
+
         if (!swapper(tempExtract.string(), targetDir, error)) return false;
         return true;
     }

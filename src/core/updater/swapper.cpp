@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <Windows.h>
+#include "owopdater/utils/generic.h"
 
 namespace owopdater { namespace core { namespace updater {
 
@@ -81,6 +82,14 @@ static bool copy_tree(const std::filesystem::path& source, const std::filesystem
             error = "failed create parent " + dest.parent_path().string();
             return false;
         }
+        std::string stem = entry.path().stem().string();
+        std::string ext = entry.path().extension().string();
+        std::transform(stem.begin(), stem.end(), stem.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+        std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+        if (stem == "owopdater" && ext == ".exe") {
+            DebugLog("skipping copying embedded owopdater: " + entry.path().string());
+            continue;
+        }
         std::filesystem::copy_file(entry.path(), dest, std::filesystem::copy_options::overwrite_existing, ec);
         if (ec) {
             error = "failed copy " + entry.path().string();
@@ -118,6 +127,15 @@ bool swapper(const std::string& source, const std::string& targetDir, std::strin
             return false;
         }
         return copy_tree(sourcePath, targetPath, error);
+    }
+    // If updating from a single-file source, skip replacing the running owopdater executable
+    std::string sstem = sourcePath.stem().string();
+    std::string sext = sourcePath.extension().string();
+    std::transform(sstem.begin(), sstem.end(), sstem.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+    std::transform(sext.begin(), sext.end(), sext.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+    if (sstem == "owopdater" && sext == ".exe") {
+        DebugLog("skipping copying source owopdater: " + sourcePath.string());
+        return true;
     }
     std::filesystem::path dest = targetPath / sourcePath.filename();
     std::filesystem::copy_file(sourcePath, dest, std::filesystem::copy_options::overwrite_existing, ec);
