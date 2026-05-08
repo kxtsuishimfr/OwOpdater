@@ -19,4 +19,24 @@ And with launch arg
 
 * This is CLI only
 
+-----------------------------------------
+
+# How it works 
+
+1. Downloads the executable or zip file from the -link you gave
+
+2. Kills the process ID (-pid) and any child processes it spawned
+
+3. Verifies if the file matches the SHA256 u gave
+
+4. Extracts the contents if it's a zip file 
+
+5. Swaps the old files with the new ones in --absolute-dir (clears target folder first)
+
+6. Launches the executable specified in --launch (if u passed that arg)
+
+-----------------------------------------
+
+Yes I will update this from time to time when im free or special ocassions 
+
 Bye bye!!
