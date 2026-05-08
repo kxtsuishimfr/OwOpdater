@@ -31,9 +31,9 @@ And with launch arg
 
 4. Extracts the contents if it's a zip file 
 
-5. Swaps the old files with the new ones in --absolute-dir (clears target folder first)
+5. Swaps the old files with the new ones in -absolute-dir (clears target folder first)
 
-6. Launches the executable specified in --launch (if u passed that arg)
+6. Launches the executable specified in -launch (if u passed that arg)
 
 -----------------------------------------
 
