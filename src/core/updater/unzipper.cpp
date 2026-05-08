@@ -8,6 +8,40 @@
 #include <filesystem>
 #include <system_error>
 #include <fstream>
+#include "owopdater/utils/generic.h"
+
+static bool wait_for_stable_dir(const std::filesystem::path& dir, int maxSeconds) noexcept {
+    try {
+        if (!std::filesystem::exists(dir)) return true;
+        int stableCount = -1;
+        int stableIterations = 0;
+        int iterations = (maxSeconds * 1000) / 250;
+        for (int i = 0; i < iterations; ++i) {
+            std::error_code ec;
+            size_t count = 0;
+            for (auto& e : std::filesystem::recursive_directory_iterator(dir, ec)) {
+                if (ec) break;
+                ++count;
+            }
+            if (ec) {
+                DebugLog("unzip: dir iterate error");
+                return false;
+            }
+            if ((int)count == stableCount) {
+                ++stableIterations;
+                if (stableIterations >= 4) return true;
+            } else {
+                stableCount = (int)count;
+                stableIterations = 0;
+            }
+            Sleep(250);
+        }
+        return false;
+    } catch (...) {
+        DebugLog("unzip: exception during wait_for_stable_dir");
+        return false;
+    }
+}
 
 namespace owopdater { namespace core { namespace updater {
 
@@ -61,6 +95,7 @@ bool unzip(const std::string& zipPath, const std::string& outDir, std::string& e
         error = "target create failed";
         return false;
     }
+    
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     bool doUninit = SUCCEEDED(hr);
     if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
@@ -74,6 +109,7 @@ bool unzip(const std::string& zipPath, const std::string& outDir, std::string& e
         error = "shell instance failed";
         return false;
     }
+    
     Folder* zipFolder = nullptr;
     Folder* destFolder = nullptr;
     bool ok = false;
@@ -91,7 +127,17 @@ bool unzip(const std::string& zipPath, const std::string& outDir, std::string& e
             hr = destFolder->CopyHere(arg, flags);
             VariantClear(&flags);
             VariantClear(&arg);
-            if (SUCCEEDED(hr)) ok = true;
+            if (SUCCEEDED(hr)) {
+                DebugLog("unzip: CopyHere initiated");
+                
+                if (wait_for_stable_dir(targetDir, 15)) {
+                    DebugLog("unzip: extraction good");
+                    ok = true;
+                } else {
+                    DebugLog("unzip: extraction no good");
+                    ok = false;
+                }
+            }
             items->Release();
         }
     }
