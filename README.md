@@ -37,6 +37,13 @@ And with launch arg
 
 -----------------------------------------
 
+# To clarify some things about -pid arg
+
+You might think its useless at first but I added the pid arg in case people want to update another process (not the main app that invoked the updater)
+so I added the pid arg so the updater doesnt have to guess 
+
+-----------------------------------------
+
 Yes I will update this from time to time when im free or special ocassions 
 
 Bye bye!!
