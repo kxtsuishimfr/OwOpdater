@@ -128,7 +128,6 @@ bool swapper(const std::string& source, const std::string& targetDir, std::strin
         }
         return copy_tree(sourcePath, targetPath, error);
     }
-    // If updating from a single-file source, skip replacing the running owopdater executable
     std::string sstem = sourcePath.stem().string();
     std::string sext = sourcePath.extension().string();
     std::transform(sstem.begin(), sstem.end(), sstem.begin(), [](unsigned char c){ return (char)std::tolower(c); });
